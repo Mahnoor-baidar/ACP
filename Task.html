@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management System</title>
+    <link rel="stylesheet" href="Task.css">
+</head>
+
+<body>
+
+<h1>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;Task Management System</h1>
+<form id="addtask" action="" method="post">
+ <!-- Task Entry Form -->
+ <form id="taskForm">
+    <div class="form-group">
+        <label for="name">Task Name:</label>
+        <input type="text" id="name" name="name" required>
+    </div>
+
+    <div class="form-group">
+        <label for="description">Task Description:</label>
+        <textarea id="description" name="description" required></textarea>
+    </div>
+
+       <!-- Submit Button -->
+       <button type="submit">Submit</button>
+</form>
+
+<!-- Display Tasks -->
+<div id="tasks-container"></div>
+
+<script>
+
+async function fetchTasks() {
+        const response = await fetch('http://localhost:8080/gettask');
+        const tasks = await response.json();
+
+        const tasksContainer = document.getElementById('tasks-container');
+        tasksContainer.innerHTML = '';
+
+        tasks.forEach(task => {
+            const taskDiv = document.createElement('div');
+            taskDiv.innerHTML = `<p>${task.name}: ${task.description}</p>`;
+            tasksContainer.appendChild(taskDiv);
+        });
+
+        
+            console.error('Error fetching tasks:', error); 
+        
+    }
+    document.getElementById('addtask').addEventListener('submit', function (event) {
+    event.preventDefault(); // Prevent the default form submission
+     // Get form data using FormData
+     const formData = new FormData(event.target);
+    
+    // Create an object in the required format
+    const dataObject = {
+        name: formData.get('name'),
+        description: formData.get('description'),
+      
+    };
+    fetch('http://localhost:8080/addtask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(dataObject),
+                })
+                .then(response => {
+                    // Check if the response status is OK
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+    
+                    // Since we don't expect a JSON response, return an empty object
+                    return {};
+                })
+                .then(data => {
+                    console.log('Success:', data);
+                    // Handle success, e.g., show a success message to the user
+                })
+                .catch((error) => {
+                    console.error('Error:', error.message);
+                    // Handle errors, e.g., show an error message to the user
+                });
+    
+            });
+
+            async function updateTask(id) {
+        const updatedTask = {
+            name: 'Updated Task',
+            description: 'Updated description'
+        };
+
+        await fetch(`http://localhost:8080/updatetask/id`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedTask),
+        });
+        
+            console.error('Error updating tasks:', error); 
+        
+        fetchTasks();
+    }
+
+    async function deleteTask(id) {
+        await fetch(`http://localhost:8080/tasks/deletetask/id`, {
+            method: 'DELETE',
+        });
+        
+            console.error('Error delete tasks:', error); 
+        
+        fetchTasks();
+    }
+
+ 
+
+    fetchTasks();
+        </script>
+</body>
+</html>
